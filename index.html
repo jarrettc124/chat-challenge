@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Jarrett's Chatroom</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      #username-error {display:none; color:red;}
+      #messaging-wrap {display:none;}
+      #askUsername {width:80%; padding-top:40px; margin:0 auto; text-align:center;}
+      #askUsername h1{font-size:30px;}
+      #askUsername h2{font-size:25px;}
+      #askUsername p{font-size:17px;}
+      #client-username {width:200px;}
+      #askUsername button{width:50px;height:20px;}
+      #messaging-wrap {width:100%;}
+      #messaging-wrap messages{width:100%; overflow: auto;}
+      #inputbar {width:100%; height:50px; position:fixed; bottom:0;}
+      #inputbar button {width:20%; height:inherit;}
+      #client-message{width:80%; height:inherit;}
+    </style>
+  </head>
+  <body>
+  
+  	
+  	
+  	<div id="askUsername">
+  		<h1>Welcome to Jarrett's Chatroom</h1>
+  		<h2>Before we begin</h2>
+  		<p>Enter a username</p>
+  		<p id="username-error">Sorry, the name you entered has already been taken</p>
+  	 	<input size="20" id="client-username"></input><br>
+  	 	<button onclick="enterUsername()">Done</button>
+  		
+  	</div>
+  	
+  	<div id="messaging-wrap">
+		<p id="messages"></p>
+	
+		<div id="inputbar"><input id="client-message" autocomplete="off" /><button onclick="didClickSendButton()">Send</button></div>
+    </div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+    	//safety reasons, use absolute url
+    	var socket = io.connect('http://localhost:5000');
+    	var messageWindow = document.getElementById('messages');
+    	
+    	socket.on('updateChat',function(username,message){
+    	
+    	
+    	
+    		messageWindow.innerHTML = messageWindow.innerHTML + '<br><b>'+username+':</b> '+message;
+
+    	});
+    	
+    	
+    	function enterUsername(){
+    	    var clientName = document.getElementById('client-username').value;
+    		
+    		socket.emit('addNewUser',clientName,function(data){
+    			if(data){
+    				document.getElementById("askUsername").style.display="none";
+    				document.getElementById("messaging-wrap").style.display="block";
+    			}
+    			else{
+    				document.getElementById('username-error').style.display='block';
+    			}
+    		});
+    	
+    	}
+    		
+    
+    	
+    	function didClickSendButton(){
+    		var clientMessage = document.getElementById('client-message').value;
+    		document.getElementById('client-message').value = "";
+
+    		socket.emit('sendMessage',clientMessage);
+    	}
+    
+    </script>
+    
+  </body>
+</html>
